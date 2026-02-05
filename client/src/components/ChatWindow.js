@@ -130,12 +130,6 @@ function ChatWindow({ conversationId, initialMessages, onToggleSidebar }) {
         }
     };
 
-    if (!conversationId) {
-        return (
-            <div className="empty-state">Select or create a conversation to start</div>
-        );
-    }
-
     return (
         <>
             <div className="chat-header">
@@ -156,7 +150,7 @@ function ChatWindow({ conversationId, initialMessages, onToggleSidebar }) {
                     />
                 </div>
                 <div className="header-actions">
-                    <button className="header-btn primary" onClick={handleGenerateSummary} disabled={loading}>
+                    <button className="header-btn primary" onClick={handleGenerateSummary} disabled={loading || !conversationId}>
                         Generate Summary
                     </button>
                     <button className="mobile-menu-btn" onClick={onToggleSidebar}>
@@ -165,53 +159,59 @@ function ChatWindow({ conversationId, initialMessages, onToggleSidebar }) {
                 </div>
             </div>
 
-            <div className="chat-messages">
-                {error && <div className="error-banner">{error}</div>}
-                {messages.length === 0 ? (
-                    <div className="empty-state">No messages yet. Start the conversation.</div>
-                ) : (
-                    messages.map((msg) => <MessageBubble key={msg.id} message={msg} />)
-                )}
-                {sending && (
-                    <div className={`message ${role}`}>
-                        <div className="message-header">{role}</div>
-                        <div className="message-bubble" style={{ opacity: 0.7 }}>
-                            <div className="message-original">Translating...</div>
+            {!conversationId ? (
+                <div className="empty-state">Select or create a conversation to start</div>
+            ) : (
+                <>
+                    <div className="chat-messages">
+                        {error && <div className="error-banner">{error}</div>}
+                        {messages.length === 0 ? (
+                            <div className="empty-state">No messages yet. Start the conversation.</div>
+                        ) : (
+                            messages.map((msg) => <MessageBubble key={msg.id} message={msg} />)
+                        )}
+                        {sending && (
+                            <div className={`message ${role}`}>
+                                <div className="message-header">{role}</div>
+                                <div className="message-bubble" style={{ opacity: 0.7 }}>
+                                    <div className="message-original">Translating...</div>
+                                </div>
+                            </div>
+                        )}
+                        <div ref={messagesEndRef} />
+                    </div>
+
+                    {showSummary && summary && (
+                        <ConversationSummary summary={summary} onClose={() => setShowSummary(false)} />
+                    )}
+
+                    <div className="chat-input-area">
+                        <div className="chat-input-container">
+                            <textarea
+                                className="chat-input"
+                                placeholder={`Type your message as ${role}...`}
+                                value={inputText}
+                                onChange={(e) => setInputText(e.target.value)}
+                                onKeyPress={handleKeyPress}
+                                rows={1}
+                            />
+                            <AudioRecorder
+                                isRecording={isRecording}
+                                onStart={startRecording}
+                                onStop={stopRecording}
+                            />
+                            <button className="send-btn" onClick={handleSend} disabled={loading || (!inputText.trim() && !audioBlob)}>
+                                Send
+                            </button>
                         </div>
+                        {audioBlob && (
+                            <div style={{ marginTop: '8px', fontSize: '14px' }}>
+                                Audio recorded. Click Send to include it with your message.
+                            </div>
+                        )}
                     </div>
-                )}
-                <div ref={messagesEndRef} />
-            </div>
-
-            {showSummary && summary && (
-                <ConversationSummary summary={summary} onClose={() => setShowSummary(false)} />
+                </>
             )}
-
-            <div className="chat-input-area">
-                <div className="chat-input-container">
-                    <textarea
-                        className="chat-input"
-                        placeholder={`Type your message as ${role}...`}
-                        value={inputText}
-                        onChange={(e) => setInputText(e.target.value)}
-                        onKeyPress={handleKeyPress}
-                        rows={1}
-                    />
-                    <AudioRecorder
-                        isRecording={isRecording}
-                        onStart={startRecording}
-                        onStop={stopRecording}
-                    />
-                    <button className="send-btn" onClick={handleSend} disabled={loading || (!inputText.trim() && !audioBlob)}>
-                        Send
-                    </button>
-                </div>
-                {audioBlob && (
-                    <div style={{ marginTop: '8px', fontSize: '14px' }}>
-                        Audio recorded. Click Send to include it with your message.
-                    </div>
-                )}
-            </div>
         </>
     );
 }

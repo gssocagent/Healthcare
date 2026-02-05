@@ -498,7 +498,8 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100%;
+    flex: 1;
+    /* Take remaining space */
     color: var(--text-secondary);
     text-align: center;
     padding: 40px;
