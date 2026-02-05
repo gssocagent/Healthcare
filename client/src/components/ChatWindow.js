@@ -33,7 +33,7 @@ function ChatWindow({ conversationId, initialMessages, onToggleSidebar }) {
     const [sending, setSending] = useState(false);
     const messagesEndRef = useRef(null);
 
-    const { messages: wsMessages, clearMessages } = useWebSocket(conversationId);
+    const { messages: wsMessages, clearMessages, isConnected } = useWebSocket(conversationId);
     const { isRecording, audioBlob, startRecording, stopRecording, clearAudio } = useAudioRecorder();
 
     useEffect(() => {
@@ -60,12 +60,35 @@ function ChatWindow({ conversationId, initialMessages, onToggleSidebar }) {
     useEffect(() => {
         if (wsMessages.length > 0) {
             const lastWsMessage = wsMessages[wsMessages.length - 1];
-            const exists = messages.some((m) => m.id === lastWsMessage.id);
-            if (!exists) {
-                setMessages((prev) => [...prev, lastWsMessage]);
-            }
+
+            setMessages((prev) => {
+                // If we have a temporary message that matches the content/role, replace it? 
+                // Hard to match exactly. 
+                // Simpler strategy: Dedup by ID. If ID doesn't exist, add it.
+                // BUT, we might have 'temp-...' messages. 
+                // Ideally, the backend would return a client_id we sent.
+                // For now, let's just add the real message. 
+                // If we implemented robust optimistic updates, we'd replace the temp one.
+                // To avoid duplicates if the temp one stays (it doesn't have the real ID),
+                // we'll filter out *old* temp messages or just let them coexist until refresh?
+                // Better: Remove any 'isTemp' message that matches the content of the new message.
+
+                const exists = prev.some((m) => m.id === lastWsMessage.id);
+                if (exists) return prev;
+
+                // Try to find a matching temp message to remove (simple heuristic)
+                const tempMatchIndex = prev.findIndex(m => m.isTemp && m.original_text === lastWsMessage.original_text && m.role === lastWsMessage.role);
+
+                if (tempMatchIndex !== -1) {
+                    const newMessages = [...prev];
+                    newMessages[tempMatchIndex] = lastWsMessage; // Replace temp with real
+                    return newMessages;
+                }
+
+                return [...prev, lastWsMessage];
+            });
         }
-    }, [wsMessages, messages]);
+    }, [wsMessages]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -77,6 +100,23 @@ function ChatWindow({ conversationId, initialMessages, onToggleSidebar }) {
 
         setSending(true);
         setError(null);
+
+        // Optimistic Update
+        const tempId = 'temp-' + Date.now();
+        const optimisticMessage = {
+            id: tempId,
+            role: role,
+            content: inputText, // Assuming text for now, audio is harder to preview optimistically without blob URL
+            original_text: inputText,
+            translated_text: 'Translating...', // Placeholder
+            timestamp: new Date().toISOString(),
+            isTemp: true
+        };
+
+        if (inputText.trim()) {
+            setMessages((prev) => [...prev, optimisticMessage]);
+        }
+
         try {
             let audioPath = null;
 
@@ -103,6 +143,8 @@ function ChatWindow({ conversationId, initialMessages, onToggleSidebar }) {
         } catch (error) {
             console.error('Error sending message:', error);
             setError("Failed to send message. Please try again.");
+            // Remove optimistic message on error
+            setMessages(prev => prev.filter(m => m.id !== tempId));
         } finally {
             setLoading(false);
             setSending(false);
@@ -133,7 +175,13 @@ function ChatWindow({ conversationId, initialMessages, onToggleSidebar }) {
     return (
         <>
             <div className="chat-header">
-                <div className="header-branding">HealthcareTranslator</div>
+                <div className="header-branding">
+                    HealthcareTranslator
+                    <span
+                        className={`connection-status ${isConnected ? 'connected' : 'disconnected'}`}
+                        title={isConnected ? "Connected to server" : "Disconnected from server"}
+                    ></span>
+                </div>
                 <div className="role-language-controls">
                     <RoleSelector role={role} onChange={setRole} />
                     <LanguageSelector
