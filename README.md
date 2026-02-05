@@ -2,6 +2,9 @@
 
 A full-stack web application enabling real-time translation between doctors and patients, featuring text chat, audio recording, conversation persistence, search, and AI-powered medical summaries.
 
+## UI
+<img width="1919" height="930" alt="image" src="https://github.com/user-attachments/assets/3a0c95e9-b15b-4a98-a693-8e5fb0d46915" />
+
 ## Features
 
 ### Completed
