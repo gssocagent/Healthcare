@@ -27,6 +27,23 @@ function App() {
         try {
             const data = await getConversations();
             setConversations(data);
+
+            // Default: If no conversations exist, create one.
+            // If conversations exist but none selected (no ID in URL/hash), select logic could go here,
+            // but for "New Conversation by default", users usually mean landing on a ready to type screen.
+            // If the latest conversation is empty, we could select it. 
+            // BUT, to keep it simple and robust:
+            // If no active conversation, lets ensure the user lands on *something*.
+            // If history is empty -> create new.
+            // If history exists -> Do we select the most recent? Or just let them pick?
+            // "add new conversation by default" -> Let's interpret as: if I open the app, I want to start typing immediately.
+            // So if the most recent conversation is empty, select it. If not, create a new one.
+
+            // Wait, for now let's just make it simple: 
+            // If no conversations, create one.
+            if (data.length === 0) {
+                await handleCreateConversation();
+            }
         } catch (error) {
             console.error('Error fetching conversations:', error);
         }

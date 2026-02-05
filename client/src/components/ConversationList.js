@@ -10,10 +10,16 @@ function ConversationList({ conversations, activeId, onSelect, onCreate, onDelet
         <div className={`sidebar ${isOpen ? 'mobile-open' : ''}`}>
             <div className="sidebar-header">
                 <h1>Healthcare Translation</h1>
-                <button className="new-conversation-btn" onClick={onCreate}>
-                    New Conversation
+            </div>
+
+            <div className="sidebar-actions">
+                <button className="new-chat-item" onClick={onCreate}>
+                    <span className="plus-icon">+</span> New Conversation
                 </button>
             </div>
+
+            <div className="history-header">History</div>
+
             <div className="conversation-list">
                 {conversations.map((conv) => (
                     <div
@@ -35,7 +41,7 @@ function ConversationList({ conversations, activeId, onSelect, onCreate, onDelet
                     </div>
                 ))}
                 {conversations.length === 0 && (
-                    <div className="empty-state">No conversations yet</div>
+                    <div className="empty-history">No history yet</div>
                 )}
             </div>
         </div>
