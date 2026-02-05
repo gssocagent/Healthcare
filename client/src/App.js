@@ -15,6 +15,7 @@ function App() {
     const [activeConversationId, setActiveConversationId] = useState(null);
     const [activeConversation, setActiveConversation] = useState(null);
     const [isCreating, setIsCreating] = useState(false);
+    const [showMobileSidebar, setShowMobileSidebar] = useState(false);
 
 
 
@@ -52,6 +53,7 @@ function App() {
             const conv = await getConversation(id);
             setActiveConversationId(id);
             setActiveConversation(conv);
+            setShowMobileSidebar(false); // Close sidebar on mobile selection
 
         } catch (error) {
             console.error('Error fetching conversation:', error);
@@ -88,17 +90,23 @@ function App() {
                     <p>Creating new conversation...</p>
                 </div>
             )}
+            {showMobileSidebar && (
+                <div className="sidebar-overlay" onClick={() => setShowMobileSidebar(false)}></div>
+            )}
             <ConversationList
                 conversations={conversations}
                 activeId={activeConversationId}
                 onSelect={handleSelectConversation}
                 onCreate={handleCreateConversation}
                 onDelete={handleDeleteConversation}
+                isOpen={showMobileSidebar}
+                onClose={() => setShowMobileSidebar(false)}
             />
             <div className="main-content">
                 <ChatWindow
                     conversationId={activeConversationId}
                     initialMessages={activeConversation?.messages || []}
+                    onToggleSidebar={() => setShowMobileSidebar(!showMobileSidebar)}
                 />
             </div>
         </div>

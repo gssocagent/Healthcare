@@ -182,7 +182,13 @@ body {
     align-items: center;
     background-color: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
     z-index: 10;
+}
+
+.mobile-menu-btn {
+    display: none;
+    /* Hidden on desktop */
 }
 
 .role-language-controls {
@@ -541,20 +547,71 @@ body {
 @media (max-width: 768px) {
     .app {
         flex-direction: column;
+        position: relative;
+        /* For overlay positioning context if needed */
     }
 
     .sidebar {
-        width: 100%;
-        height: auto;
-        border-right: none;
-        border-bottom: 1px solid var(--border-color);
+        position: fixed;
+        left: -300px;
+        /* Hide off-screen */
+        top: 0;
+        bottom: 0;
+        height: 100vh;
+        width: 300px;
+        z-index: 1001;
+        /* Above overlay */
+        background-color: #fafafa;
+        border-right: 1px solid var(--border-color);
+        transition: left 0.3s ease;
+        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar.mobile-open {
+        left: 0;
+        /* Slide in */
+    }
+
+    /* Overlay for mobile sidebar */
+    .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        backdrop-filter: blur(2px);
+        animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
     }
 
     .sidebar-header {
-        padding: 12px 16px;
+        padding: 16px;
         display: flex;
         align-items: center;
         justify-content: space-between;
+    }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        padding: 4px 8px;
+        margin-right: 8px;
+        display: block;
+        /* Visible on mobile */
     }
 
     .sidebar-header h1 {
@@ -577,7 +634,25 @@ body {
         padding: 12px 16px;
         flex-wrap: wrap;
         gap: 12px;
-        justify-content: center;
+        justify-content: space-between;
+        /* Space between branding and actions */
+        align-items: center;
+        /* Center items vertically */
+    }
+
+    .header-branding {
+        font-size: 16px;
+        font-weight: 700;
+        order: 1;
+        /* First */
+    }
+
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        order: 2;
+        /* Second */
     }
 
     .role-language-controls {
@@ -585,6 +660,9 @@ body {
         flex-wrap: wrap;
         justify-content: center;
         width: 100%;
+        order: 3;
+        /* Third (new row) */
+        margin-top: 8px;
     }
 
     .control-group {
@@ -636,8 +714,9 @@ body {
     }
 
     .chat-input {
+        flex: 0 0 100%;
+        /* Explicitly force full width to break line */
         width: 100%;
-        /* Force full width line */
         font-size: 14px;
         padding: 10px;
         min-height: 44px;

@@ -19,7 +19,7 @@ const DEFAULT_LANGUAGES = [
     { code: 'pt', name: 'Portuguese' },
 ];
 
-function ChatWindow({ conversationId, initialMessages }) {
+function ChatWindow({ conversationId, initialMessages, onToggleSidebar }) {
     const [messages, setMessages] = useState(initialMessages || []);
     const [inputText, setInputText] = useState('');
     const [role, setRole] = useState('doctor');
@@ -139,6 +139,7 @@ function ChatWindow({ conversationId, initialMessages }) {
     return (
         <>
             <div className="chat-header">
+                <div className="header-branding">HealthcareTranslator</div>
                 <div className="role-language-controls">
                     <RoleSelector role={role} onChange={setRole} />
                     <LanguageSelector
@@ -157,6 +158,9 @@ function ChatWindow({ conversationId, initialMessages }) {
                 <div className="header-actions">
                     <button className="header-btn primary" onClick={handleGenerateSummary} disabled={loading}>
                         Generate Summary
+                    </button>
+                    <button className="mobile-menu-btn" onClick={onToggleSidebar}>
+                        ☰
                     </button>
                 </div>
             </div>

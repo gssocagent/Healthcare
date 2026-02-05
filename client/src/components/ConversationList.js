@@ -1,13 +1,13 @@
 import React from 'react';
 
-function ConversationList({ conversations, activeId, onSelect, onCreate, onDelete }) {
+function ConversationList({ conversations, activeId, onSelect, onCreate, onDelete, isOpen, onClose }) {
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 
     return (
-        <div className="sidebar">
+        <div className={`sidebar ${isOpen ? 'mobile-open' : ''}`}>
             <div className="sidebar-header">
                 <h1>Healthcare Translation</h1>
                 <button className="new-conversation-btn" onClick={onCreate}>
