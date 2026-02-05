@@ -14,6 +14,7 @@ function App() {
     const [conversations, setConversations] = useState([]);
     const [activeConversationId, setActiveConversationId] = useState(null);
     const [activeConversation, setActiveConversation] = useState(null);
+    const [isCreating, setIsCreating] = useState(false);
 
 
 
@@ -31,6 +32,7 @@ function App() {
     };
 
     const handleCreateConversation = async () => {
+        setIsCreating(true);
         try {
             const newConv = await createConversation();
             setConversations((prev) => [newConv, ...prev]);
@@ -39,6 +41,8 @@ function App() {
 
         } catch (error) {
             console.error('Error creating conversation:', error);
+        } finally {
+            setIsCreating(false);
         }
     };
 
@@ -75,6 +79,12 @@ function App() {
 
     return (
         <div className="app">
+            {isCreating && (
+                <div className="loading-overlay">
+                    <div className="loading-spinner"></div>
+                    <p>Creating new conversation...</p>
+                </div>
+            )}
             <ConversationList
                 conversations={conversations}
                 activeId={activeConversationId}
